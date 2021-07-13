@@ -19,12 +19,31 @@ pipeline {
 
   stages {
     stage('Build_Docker_Image') {
+      when {
+        not {
+          branch 'test'
+        }
+      }
       environment {
         TAG_NAME = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
       }
       steps {
         withDockerRegistry([ credentialsId: "kivapush_docker", url: ""]) {
           sh "docker build -t ${TAGGED_IMAGE_NAME} -f Dockerfile.jenkins . --build-arg TAG_NAME=${TAG_NAME} --pull --no-cache"
+        }
+      }
+    }
+
+    stage('Build_Docker_Image_N16') {
+      when {
+        branch 'test'
+      }
+      environment {
+        TAG_NAME = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+      }
+      steps {
+        withDockerRegistry([ credentialsId: "kivapush_docker", url: ""]) {
+          sh "docker build -t ${TAGGED_IMAGE_NAME} -f Dockerfile.jenkins-n16 . --build-arg TAG_NAME=${TAG_NAME} --pull --no-cache"
         }
       }
     }
